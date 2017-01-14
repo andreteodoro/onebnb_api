@@ -3,7 +3,7 @@ FROM ruby:2.3-slim
 
 # Install dependencies
 RUN apt-get update && apt-get install -qq -y --no-install-recommends \
-      build-essential nodejs libpq-dev
+      build-essential nodejs libpq-dev imagemagick
 
 # Set our path
 ENV INSTALL_PATH /onebnb_api
