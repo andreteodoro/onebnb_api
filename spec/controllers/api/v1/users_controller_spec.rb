@@ -54,7 +54,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
         expect(response.status).to eql(401)
       end
     end
-    
+
     after(:all) do
       # clean the directory with the uploaded images
       FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/user/photo/[^.]*"])
