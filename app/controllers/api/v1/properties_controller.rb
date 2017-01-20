@@ -1,5 +1,6 @@
 class Api::V1::PropertiesController < ApplicationController
-  before_action :set_api_v1_property, only: [:show, :update, :destroy]
+  before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist]
+  before_action :authenticate_api_v1_user!, except: [:index, :show, :search]
 
   # GET /api/v1/properties
   # GET /api/v1/properties.json
@@ -7,12 +8,9 @@ class Api::V1::PropertiesController < ApplicationController
     @api_v1_properties = Property.all
   end
 
-  # GET /api/v1/properties/1
   # GET /api/v1/properties/1.json
-  def show
-  end
+  def show; end
 
-  # POST /api/v1/properties
   # POST /api/v1/properties.json
   def create
     @api_v1_property = Property.new(api_v1_property_params)
@@ -24,7 +22,6 @@ class Api::V1::PropertiesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /api/v1/properties/1
   # PATCH/PUT /api/v1/properties/1.json
   def update
     if @api_v1_property.update(api_v1_property_params)
@@ -34,20 +31,36 @@ class Api::V1::PropertiesController < ApplicationController
     end
   end
 
-  # DELETE /api/v1/properties/1
   # DELETE /api/v1/properties/1.json
   def destroy
     @api_v1_property.destroy
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_api_v1_property
-      @api_v1_property = Property.find(params[:id])
-    end
+  # POST /api/v1/properties/:id/wishlist.json
+  def add_to_wishlist
+    @api_v1_property.wishlists.find_or_create_by(user: current_api_v1_user)
+    render json: { success: true }
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def api_v1_property_params
-      params.require(:api_v1_property).permit(:title, :description)
-    end
+  # DELETE /api/v1/properties/:id/wishlist.json
+  def remove_from_wishlist
+    @api_v1_property.wishlists.find_by(user: current_api_v1_user).delete
+    render json: { success: true }, status: 200
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
+
+  private
+
+  # Use callbacks to share common setup or constraints between actions.
+  def set_api_v1_property
+    @api_v1_property = Property.find(params[:id])
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def api_v1_property_params
+    params.require(:api_v1_property).permit(:title, :description)
+  end
 end

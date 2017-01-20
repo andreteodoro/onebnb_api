@@ -90,7 +90,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       end
     end
   end
-  
+
   after(:all) do
     # clean the directory with the uploaded images
     FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/user/photo/[^.]*"])
