@@ -1,0 +1,19 @@
+---
+development:
+  cloud_name: alteodoro
+  api_key: '948217944567214'
+  api_secret: kc5xUhUriZHu9dot5GIMgGnP27I
+  enhance_image_tag: true
+  static_image_support: false
+production:
+  cloud_name: alteodoro
+  api_key: '948217944567214'
+  api_secret: kc5xUhUriZHu9dot5GIMgGnP27I
+  enhance_image_tag: true
+  static_image_support: true
+test:
+  cloud_name: alteodoro
+  api_key: '948217944567214'
+  api_secret: kc5xUhUriZHu9dot5GIMgGnP27I
+  enhance_image_tag: true
+  static_image_support: false
