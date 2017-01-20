@@ -9,6 +9,8 @@ class Property < ApplicationRecord
   has_many :wishlists
   has_many :photos
 
+  searchkick
+
   def search_data
     {
       status: status,

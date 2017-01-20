@@ -2,7 +2,19 @@ class Api::V1::PropertiesController < ApplicationController
   before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist]
   before_action :authenticate_api_v1_user!, except: [:index, :show, :search]
 
-  # GET /api/v1/properties
+  # GET /api/v1/search
+  def search
+    # If nothing was informed we search for everything
+    search_condition = params[:search] || '*'
+    # If not selecting by page get the first
+    page = params[:page] || 1
+    # TODO: add filters based on facilities (if wifi, air_conditioning, etc.)
+    conditions = { status: :active }
+
+    @api_v1_properties = (Property.search search_condition, where: conditions, page: page, per_page: 18)
+    render template: '/api/v1/properties/index', status: 200
+  end
+
   # GET /api/v1/properties.json
   def index
     @api_v1_properties = Property.all
