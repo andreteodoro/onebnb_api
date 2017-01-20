@@ -4,7 +4,7 @@ class Api::V1::PropertiesController < ApplicationController
   # GET /api/v1/properties
   # GET /api/v1/properties.json
   def index
-    @api_v1_properties = Api::V1::Property.all
+    @api_v1_properties = Property.all
   end
 
   # GET /api/v1/properties/1
@@ -15,7 +15,7 @@ class Api::V1::PropertiesController < ApplicationController
   # POST /api/v1/properties
   # POST /api/v1/properties.json
   def create
-    @api_v1_property = Api::V1::Property.new(api_v1_property_params)
+    @api_v1_property = Property.new(api_v1_property_params)
 
     if @api_v1_property.save
       render :show, status: :created, location: @api_v1_property
@@ -43,7 +43,7 @@ class Api::V1::PropertiesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_api_v1_property
-      @api_v1_property = Api::V1::Property.find(params[:id])
+      @api_v1_property = Property.find(params[:id])
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

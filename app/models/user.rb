@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   mount_base64_uploader :photo, PhotoUploader
+  has_many :wishlists
   # Include default devise modules.
   devise :database_authenticatable, :registerable,
           :recoverable, :rememberable, :trackable, :validatable,

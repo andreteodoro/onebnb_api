@@ -62,7 +62,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
       it 'deletes the requested user' do
         expect do
           delete :destroy, params: { id: @property.id }
-        end.to change(Api::V1::Property, :count).by(-1)
+        end.to change(Property, :count).by(-1)
         expect(response.status).to eql(204)
       end
     end
