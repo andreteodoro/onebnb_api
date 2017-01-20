@@ -31,7 +31,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
   describe 'POST #create' do
     context 'whith valid params' do
       it 'creates the requested user' do
-        @new_attributes = { title: FFaker::Name.name, description: FFaker::Name.name }
+        @new_attributes = { title: FFaker::Lorem.word, description: FFaker::Lorem.paragraph }
         post :create, params: { api_v1_property: @new_attributes }
         expect(response.status).to eql(201)
       end
@@ -45,7 +45,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
     context 'whith valid params' do
       it 'updates the requested user' do
-        @new_attributes = { title: FFaker::Name.name }
+        @new_attributes = { name: FFaker::Lorem.word }
         put :update, params: { id: @property.id, api_v1_property: @new_attributes }
         @property.reload
         expect(@property.title).to eql(@new_attributes[:title])
@@ -64,6 +64,69 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
           delete :destroy, params: { id: @property.id }
         end.to change(Property, :count).by(-1)
         expect(response.status).to eql(204)
+      end
+    end
+  end
+
+  describe "POST #wishlist" do
+    before do
+      @user = create(:user)
+      @property = create(:property)
+
+      @auth_headers = @user.create_new_auth_token
+      request.env["HTTP_ACCEPT"] = 'application/json'
+    end
+
+    context "with valid params and tokens" do
+      before do
+        request.headers.merge!(@auth_headers)
+      end
+
+      it "add to wishlist" do
+        post :add_to_wishlist, params: {id: @property.id}
+        @property.reload
+        expect(@property.wishlists.last.id).to eql(Wishlist.last.id)
+      end
+    end
+
+    context "with invalid tokens" do
+      it "can't add to wishlist" do
+        post :add_to_wishlist, params: {id: @property.id}
+        expect(response.status).to eql(401)
+      end
+    end
+  end
+
+  describe "DELETE #wishlist" do
+    before do
+      @user     = create(:user)
+      @property = create(:property)
+      @wishlist = create(:wishlist, user: @user, property: @property)
+
+      @auth_headers = @user.create_new_auth_token
+      request.env["HTTP_ACCEPT"] = 'application/json'
+    end
+
+    context "with valid params and tokens" do
+      before do
+        request.headers.merge!(@auth_headers)
+      end
+
+      it "remove from wishlist" do
+        delete :remove_from_wishlist, params: {id: @property.id}
+        expect(Wishlist.all.count).to eql(0)
+      end
+    end
+
+    context "with invalid tokens" do
+      it "can't add to wishlist" do
+        delete :remove_from_wishlist, params: {id: @property.id}
+        expect(response.status).to eql(401)
+      end
+
+      it "whishlist keep existing" do
+        delete :remove_from_wishlist, params: {id: @property.id}
+        expect(Wishlist.all.count).not_to eql(0)
       end
     end
   end
