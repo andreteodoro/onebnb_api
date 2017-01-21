@@ -91,6 +91,18 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         @property.reload
         expect(@property.wishlists.last.id).to eql(Wishlist.last.id)
       end
+
+      it "add the wishlist to the right user" do
+        post :add_to_wishlist, params: {id: @property.id}
+        @property.reload
+        expect(Wishlist.last.user.id).to eql(@user.id)
+      end
+
+      it "add the wishlist to the right property" do
+        post :add_to_wishlist, params: {id: @property.id}
+        @property.reload
+        expect(Wishlist.last.property.id).to eql(@property.id)
+      end
     end
 
     context "with invalid tokens" do
