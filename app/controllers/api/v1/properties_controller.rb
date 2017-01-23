@@ -8,10 +8,11 @@ class Api::V1::PropertiesController < ApplicationController
     search_condition = params[:search] || '*'
     # If not selecting by page get the first
     page = params[:page] || 1
-    # TODO: add filters based on facilities (if wifi, air_conditioning, etc.)
-    conditions = { status: :active }
+    # Filters for the search (only actuve properties)
+    filters = params[:filters] || {}
+    filters.merge!(status: :active)
 
-    @api_v1_properties = (Property.search search_condition, where: conditions, page: page, per_page: 18)
+    @api_v1_properties = (Property.search search_condition, where: filters, page: page, per_page: 18)
     render template: '/api/v1/properties/index', status: 200
   end
 
@@ -73,6 +74,6 @@ class Api::V1::PropertiesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def api_v1_property_params
-    params.require(:api_v1_property).permit(:title, :description)
+    params.require(:api_v1_property).permit(:name, :description)
   end
 end
