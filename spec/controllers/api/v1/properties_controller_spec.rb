@@ -2,6 +2,8 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::PropertiesController, type: :controller do
   before do
+    @user = create(:user)
+    @auth_headers = @user.create_new_auth_token
     # Setting the request as json (the URL properties.json will be use instead of users)
     request.env['HTTP_ACCEPT'] = 'application/json'
   end
@@ -30,17 +32,30 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
   describe 'POST #create' do
     context 'whith valid params' do
+      before do
+        # Merge the token into the Header
+        request.headers.merge!(@auth_headers)
+      end
+
       it 'creates the requested property' do
         # TODO: fix commented tests
-        #
-        # @new_attributes = {
-        #   name: FFaker::Lorem.word,
-        #   description: FFaker::Lorem.paragraph
-        # }
-        #
-        #
-        # post :create, params: { api_v1_property_params: @new_attributes }
-        # expect(response.status).to eql(201)
+        @new_attributes = {
+          name: FFaker::Lorem.word,
+          description: FFaker::Lorem.paragraph,
+          price: FFaker.numerify("#.##").to_f,
+          accommodation_type: rand(0..2),
+          guest_max: rand(1..10),
+          beds: rand(1..10),
+          bedroom: rand(1..10),
+          status: rand(0..3),
+          bathroom: rand(1..10),
+          user: @user,
+          facility: create(:facility),
+          address: create(:address)
+        }
+
+        #post :create, params: { api_v1_property: @new_attributes }
+        #expect(response.status).to eql(201)
       end
     end
   end
