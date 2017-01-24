@@ -5,11 +5,11 @@ class Api::V1::PropertiesController < ApplicationController
   # GET /api/v1/search
   def search
     # If nothing was informed we search for everything
-    search_condition = params[:search] || '*'
+    search_condition = params[:search].split('&').first || '*'
     # If not selecting by page get the first
     page = params[:page] || 1
-    # Filters for the search (only actuve properties)
-    filters = params[:filters] || {}
+    # Filter parameters in the query (only active properties)
+    filters = Rack::Utils.parse_nested_query(params[:search]).deep_symbolize_keys.drop(1).to_h || {}
     filters.merge!(status: :active)
 
     @api_v1_properties = (Property.search search_condition, where: filters, page: page, per_page: 18)

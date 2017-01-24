@@ -30,13 +30,16 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
   describe 'POST #create' do
     context 'whith valid params' do
-      it 'creates the requested user' do
+      it 'creates the requested property' do
         # TODO: fix commented tests
+        #
         # @new_attributes = {
-        #   title: FFaker::Lorem.word,
+        #   name: FFaker::Lorem.word,
         #   description: FFaker::Lorem.paragraph
         # }
-        # post :create, params: { api_v1_property: @new_attributes }
+        #
+        #
+        # post :create, params: { api_v1_property_params: @new_attributes }
         # expect(response.status).to eql(201)
       end
     end
@@ -48,7 +51,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
     end
 
     context 'whith valid params' do
-      it 'updates the requested user' do
+      it 'updates the requested property' do
         # @new_attributes = { name: FFaker::Lorem.word }
         # put :update, params: { id: @property.id, api_v1_property: @new_attributes }
         # @property.reload
@@ -183,7 +186,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         # Force reindex
         Property.reindex
 
-        get :search, params: {search: 'Sao Paulo', filters: {wifi: true}}
+        get :search, params: {search: 'Sao Paulo&wifi=true'}
         expect(JSON.parse(response.body).count).to eql(1)
       end
     end
