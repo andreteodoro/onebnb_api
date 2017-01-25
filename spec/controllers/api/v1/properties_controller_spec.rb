@@ -81,7 +81,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
     end
 
     context 'whith valid params' do
-      it 'deletes the requested user' do
+      it 'deletes the requested property' do
         # expect do
         #   delete :destroy, params: { id: @property.id }
         # end.to change(Property, :count).by(-1)
@@ -201,7 +201,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         # Force reindex
         Property.reindex
 
-        get :search, params: {search: 'Sao Paulo&wifi=true'}
+        get :search, params: {wifi: true, search: 'Sao Paulo'}
         expect(JSON.parse(response.body).count).to eql(1)
       end
     end
