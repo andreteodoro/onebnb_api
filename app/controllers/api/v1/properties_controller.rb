@@ -9,7 +9,7 @@ class Api::V1::PropertiesController < ApplicationController
     # If not selecting by page get the first
     page = params[:page] || 1
     # Filter parameters in the query (only active properties)
-    filters = request.query_parameters.except(:search)
+    filters = request.query_parameters.except(:search,:page)
     filters.merge!(status: :active)
 
     @api_v1_properties = (Property.search search_condition, where: filters, page: page, per_page: 18)
