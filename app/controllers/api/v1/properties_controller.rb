@@ -13,6 +13,7 @@ class Api::V1::PropertiesController < ApplicationController
     filters.merge!(status: :active)
 
     @api_v1_properties = (Property.search search_condition, where: filters, page: page, per_page: 18)
+    @total_count = @api_v1_properties.total_count
     render template: '/api/v1/properties/index', status: 200
   end
 
