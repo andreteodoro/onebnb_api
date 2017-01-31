@@ -1,6 +1,6 @@
 class Property < ApplicationRecord
-  enum status: [ :active, :pending, :inactive, :blocked ]
-  enum accommodation_type: [ :whole_house, :whole_bedroom, :shared_bedroom ]
+  enum status: [:active, :pending, :inactive, :blocked]
+  enum accommodation_type: [:whole_house, :whole_bedroom, :shared_bedroom]
 
   belongs_to :user
   belongs_to :address
@@ -8,6 +8,11 @@ class Property < ApplicationRecord
 
   has_many :wishlists
   has_many :photos
+  has_many :comments
+
+  validates_presence_of :address, :facility, :user, :status, :price, :photos,
+                        :accommodation_type, :beds, :bedroom, :bathroom, :guest_max,
+                        :description
 
   searchkick
 
