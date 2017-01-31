@@ -26,8 +26,8 @@ json.property do
       json.name comment.user.name
       json.photo comment.user.photo
       json.date comment.created_at.strftime('%m/%Y')
-    end
-
-    json.total_count @api_v1_properties.total_count if @api_v1_properties.respond_to? :total_count
+    end  
   end
+
+  json.total_count @api_v1_properties.total_count if @api_v1_properties.respond_to? :total_count
 end
