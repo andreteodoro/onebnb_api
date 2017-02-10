@@ -11,6 +11,12 @@ Rails.application.routes.draw do
 
       resources :users, only: [:update]
 
+      resources :reservations do
+        member do
+          post 'evaluation', to: 'reservation#evaluation'
+        end
+      end
+
       resources :properties do
         member do
           post 'wishlist', to: 'properties#add_to_wishlist'
