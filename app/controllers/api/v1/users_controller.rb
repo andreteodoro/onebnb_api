@@ -1,6 +1,11 @@
 class Api::V1::UsersController < ApplicationController
   before_action :authenticate_api_v1_user!
 
+  def current_user
+    @user = current_api_v1_user
+    render template: '/api/v1/users/show', status: 200
+  end
+
   # GET /api/v1/users/:id/wishlist
   def wishlist
     @api_v1_properties = current_api_v1_user.wishlists.map(&:property)

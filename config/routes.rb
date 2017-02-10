@@ -8,6 +8,8 @@ Rails.application.routes.draw do
       get 'autocomplete', to: 'properties#autocomplete'
 
       get 'users/wishlist', to: 'users#wishlist'
+      get 'current_user', to: 'users#current_user'
+
 
       resources :users, only: [:update]
 
