@@ -12,5 +12,9 @@ FactoryGirl.define do
     user
     facility
     address
+
+    before(:create) do |property|
+      property.photos << FactoryGirl.create(:photo)
+    end
   end
 end

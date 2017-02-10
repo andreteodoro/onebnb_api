@@ -5,6 +5,8 @@ Rails.application.routes.draw do
 
       get 'search', to: 'properties#search'
 
+      get 'autocomplete', to: 'properties#autocomplete'
+
       get 'users/wishlist', to: 'users#wishlist'
 
       resources :users, only: [:update]

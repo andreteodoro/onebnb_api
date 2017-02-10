@@ -1,6 +1,6 @@
 class Api::V1::PropertiesController < ApplicationController
   before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist]
-  before_action :authenticate_api_v1_user!, except: [:index, :show, :search]
+  before_action :authenticate_api_v1_user!, except: [:index, :show, :search, :autocomplete]
 
   # GET /api/v1/search
   def search
@@ -9,8 +9,8 @@ class Api::V1::PropertiesController < ApplicationController
     # If not selecting by page get the first
     page = params[:page] || 1
     # Filter parameters in the query (only active properties)
-    filters = request.query_parameters.except(:search,:page)
-    filters.merge!(status: :active)
+    filters = request.query_parameters.except(:search, :page)
+    filters[:status] = :active
 
     @api_v1_properties = (Property.search search_condition, where: filters, page: page, per_page: 18)
     @total_count = @api_v1_properties.total_count
@@ -24,6 +24,17 @@ class Api::V1::PropertiesController < ApplicationController
 
   # GET /api/v1/properties/1.json
   def show; end
+
+  # GET /api/v1/autocomplete.json
+  def autocomplete
+    results = []
+    Property.where(status: :active).each do |property|
+      results << property.name
+      results << property.address.city
+      results << property.address.country
+    end
+    render json: results, status: 200
+  end
 
   # POST /api/v1/properties.json
   def create
