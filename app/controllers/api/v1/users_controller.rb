@@ -14,10 +14,18 @@ class Api::V1::UsersController < ApplicationController
 
   def update
     @user = current_api_v1_user
-    if @user.update(user_params)
-      render :show, status: :ok
-    else
-      render json: @user.errors, status: :unprocessable_entity
+    begin
+      if params[:address]
+        if @user.address.present?
+          @user.address.update(address_params)
+        else
+          @user.update(address: Address.create(address_params))
+        end
+      end
+      @user.update(user_params)
+      render template: '/api/v1/users/show', status: 200
+    rescue Exception => errors
+      render json: errors, status: :unprocessable_entity
     end
   end
 
@@ -25,6 +33,10 @@ class Api::V1::UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:name, :email, :nickname, :photo)
+    params.require(:user).permit(:name, :photo, :description, :phone, :email, :gender, :birthday)
   end
+
+  def address_params
+    params.require(:address).permit(:country, :city, :state, :neighborhood, :street, :number)
+    end
 end
