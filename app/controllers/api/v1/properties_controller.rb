@@ -25,7 +25,7 @@ class Api::V1::PropertiesController < ApplicationController
       results << property.address.city
       results << property.address.country
     end
-    render json: results, status: 200
+    render json: results.uniq, status: 200
   end
 
   # GET /api/v1/featured
