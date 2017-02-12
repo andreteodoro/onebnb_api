@@ -2,16 +2,12 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       mount_devise_token_auth_for 'User', at: 'auth'
-
-      get 'search', to: 'properties#search'
-
-      get 'autocomplete', to: 'properties#autocomplete'
-
       get 'users/wishlist', to: 'users#wishlist'
+      put 'users', to: 'users#update'
       get 'current_user', to: 'users#current_user'
 
-
-      resources :users, only: [:update]
+      get 'search', to: 'properties#search'
+      get 'autocomplete', to: 'properties#autocomplete'
 
       resources :reservations do
         member do

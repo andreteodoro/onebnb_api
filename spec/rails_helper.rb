@@ -1,6 +1,6 @@
 ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../../config/environment', __FILE__)
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+abort('The Rails environment is running in production mode!') if Rails.env.production?
 require 'spec_helper'
 require 'rspec/rails'
 # Adding FFaker
@@ -15,6 +15,12 @@ RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   # Including the Devise Helpers to help with the token
   config.include Devise::Test::ControllerHelpers, type: :controller
+
+  # Clean the directories with the uploaded images
+  config.after(:all) do
+    FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/"]) if Rails.env.test?
+    FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/"]) if Rails.env.test?
+  end
 
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
   config.use_transactional_fixtures = true

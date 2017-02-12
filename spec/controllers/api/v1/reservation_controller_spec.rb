@@ -44,9 +44,4 @@ RSpec.describe Api::V1::ReservationController, type: :controller do
       end
     end
   end
-
-  after(:all) do
-    # clean the directory with the uploaded images
-    FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/photo/photo/[^.]*"])
-  end
 end
