@@ -1,5 +1,5 @@
 json.property do
-  json.extract! api_v1_property, :id, :price, :name, :description, :user_id, :accommodation_type, :guest_max, :beds, :bedroom, :status, :bathroom, :rating, :created_at, :updated_at
+  json.extract! api_v1_property, :id, :price, :name, :description, :user_id, :accommodation_type, :guest_max, :beds, :bedroom, :status, :bathroom, :rating, :priority, :created_at, :updated_at
 
   json.address do
     json.extract! api_v1_property.address, :id, :country, :city, :neighborhood, :street, :number, :zipcode, :latitude, :longitude, :created_at, :updated_at, :state
@@ -26,7 +26,7 @@ json.property do
       json.name comment.user.name
       json.photo comment.user.photo
       json.date comment.created_at.strftime('%m/%Y')
-    end  
+    end
   end
 
   json.total_count @api_v1_properties.total_count if @api_v1_properties.respond_to? :total_count

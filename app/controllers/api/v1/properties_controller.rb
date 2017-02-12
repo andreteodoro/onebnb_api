@@ -1,6 +1,6 @@
 class Api::V1::PropertiesController < ApplicationController
   before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist]
-  before_action :authenticate_api_v1_user!, except: [:index, :show, :search, :autocomplete]
+  before_action :authenticate_api_v1_user!, except: [:index, :show, :search, :autocomplete, :featured]
 
   # GET /api/v1/search
   def search
@@ -17,14 +17,6 @@ class Api::V1::PropertiesController < ApplicationController
     render template: '/api/v1/properties/index', status: 200
   end
 
-  # GET /api/v1/properties.json
-  def index
-    @api_v1_properties = Property.all
-  end
-
-  # GET /api/v1/properties/1.json
-  def show; end
-
   # GET /api/v1/autocomplete.json
   def autocomplete
     results = []
@@ -35,6 +27,34 @@ class Api::V1::PropertiesController < ApplicationController
     end
     render json: results, status: 200
   end
+
+  # GET /api/v1/featured
+  # GET /api/v1/featured.json
+  def featured
+    properties = []
+    begin
+      # Try to get the 3 properties with priority flag
+      Property.where(priority: true, status: :active).order('RANDOM()').limit(3).each { |p| properties << p }
+
+      # Get the missin properties
+      missing = 3 - properties.count
+      Property.where(status: :active).order('RANDOM()').limit(missing).each { |p| properties << p } if missing > 0
+
+      @api_v1_properties = properties
+
+      render template: '/api/v1/properties/index', status: 200
+    rescue Exception => errors
+      render json: errors, status: :unprocessable_entity
+    end
+  end
+
+  # GET /api/v1/properties.json
+  def index
+    @api_v1_properties = Property.all
+  end
+
+  # GET /api/v1/properties/1.json
+  def show; end
 
   # POST /api/v1/properties.json
   def create
