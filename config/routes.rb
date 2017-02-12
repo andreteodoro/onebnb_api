@@ -8,17 +8,18 @@ Rails.application.routes.draw do
 
       get 'search', to: 'properties#search'
       get 'autocomplete', to: 'properties#autocomplete'
-
-      resources :reservations do
-        member do
-          post 'evaluation', to: 'reservation#evaluation'
-        end
-      end
-
+      get 'featured', to: 'properties#featured'
+      
       resources :properties do
         member do
           post 'wishlist', to: 'properties#add_to_wishlist'
           delete 'wishlist', to: 'properties#remove_from_wishlist'
+        end
+      end
+
+      resources :reservations do
+        member do
+          post 'evaluation', to: 'reservation#evaluation'
         end
       end
     end
