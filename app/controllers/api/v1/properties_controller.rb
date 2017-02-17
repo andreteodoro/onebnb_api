@@ -36,8 +36,7 @@ class Api::V1::PropertiesController < ApplicationController
       # Try to get the 3 properties with priority flag
       Property.where(priority: true, status: :active).order('RANDOM()').limit(3).each { |p| properties << p }
 
-      # Get the missin properties
-      p missing
+      # Get the missing properties
       missing = 3 - properties.count
       Property.where(priority: false, status: :active).order('RANDOM()').limit(missing).each { |p| properties << p } if missing > 0
 
