@@ -10,6 +10,8 @@ class Property < ApplicationRecord
   has_many :photos
   has_many :comments
   has_many :reservations
+  has_many :talks
+  has_many :messages
 
   validates_presence_of :address, :facility, :user, :status, :price, :photos,
                         :accommodation_type, :beds, :bedroom, :bathroom, :guest_max,

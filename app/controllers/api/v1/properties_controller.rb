@@ -37,6 +37,7 @@ class Api::V1::PropertiesController < ApplicationController
       Property.where(priority: true, status: :active).order('RANDOM()').limit(3).each { |p| properties << p }
 
       # Get the missin properties
+      p missing
       missing = 3 - properties.count
       Property.where(priority: false, status: :active).order('RANDOM()').limit(missing).each { |p| properties << p } if missing > 0
 
