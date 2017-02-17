@@ -41,6 +41,9 @@ gem 'geocoder'
 # Intelligent search made easy with Rails and Elasticsearch
 gem 'searchkick'
 
+# Pagination
+gem 'will_paginate'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
