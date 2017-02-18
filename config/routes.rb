@@ -16,6 +16,7 @@ Rails.application.routes.draw do
         end
       end
       get 'talks', to: 'talks#index'
+      post 'talks/(:id)/messages', to: 'talks#create_message'
 
       resources :properties do
         member do
