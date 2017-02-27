@@ -5,10 +5,13 @@ json.array! @talks do |talk|
     # Show the last message date
     json.date talk.messages.last.created_at if talk.messages.count >= 1
 
+    # Show the last message if present
+    json.message talk.messages.first if talk.messages.present?
+
     json.user do
       # Show the information about the other user at the talk
       @user = (current_api_v1_user == talk.property.user) ? talk.user : talk.property.user
-      json.extract! @user, :id, :name, :photo
+    json.extract! @user, :id, :name, :photo
     end
 
     if talk.reservation

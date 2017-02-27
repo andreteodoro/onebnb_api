@@ -2,13 +2,13 @@ json.talk do
   json.user do
     # Show the information about the other user at the talk
     @user = (current_api_v1_user == @talk.property.user) ? @talk.user : @talk.property.user
-    json.extract! @user, :id, :name, :photo
+    json.extract! @user, :id, :name, :photo, :phone, :email
   end
 
   if @talk.reservation
     json.reservation do
       json.extract! @talk.reservation, :id, :status, :checkin_date, :checkout_date
-      json.interval @talk.reservation.staying_days
+      json.staying_days @talk.reservation.staying_days
       # TODO: Mudar no futuro para que use o preço que for gerado quando o reserva for aceita
       json.price (@talk.reservation.staying_days * @talk.reservation.property.price)
 
