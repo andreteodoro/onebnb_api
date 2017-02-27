@@ -28,6 +28,17 @@ class Api::V1::PropertiesController < ApplicationController
     render json: results.uniq, status: 200
   end
 
+  # GET /api/v1/trips.json
+  def trips
+    @properties = {}
+    @properties[:next] = current_api_v1_user.reservations.where(status: :active).map(&:property)
+    @properties[:previous] = current_api_v1_user.reservations.where(status: :finished).map(&:property)
+    @properties[:pending] = current_api_v1_user.reservations.where(status: :pending).map(&:property)
+    @properties[:wishlist] = current_api_v1_user.wishlists.map(&:property)
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
+
   # GET /api/v1/featured
   # GET /api/v1/featured.json
   def featured

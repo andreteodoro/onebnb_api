@@ -1,4 +1,4 @@
-json.extract! api_v1_reservation, :id, :property_id, :user_id, :checkin_date, :checkout_date, :status, :created_at , :updated_at
+json.extract! api_v1_reservation, :id, :property_id, :user_id, :checkin_date, :checkout_date, :status, :created_at, :updated_at
 
 json.user do
   json.extract! api_v1_reservation.user, :id, :name, :email, :photo, :created_at, :updated_at

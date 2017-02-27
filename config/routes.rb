@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       get 'search', to: 'properties#search'
       get 'autocomplete', to: 'properties#autocomplete'
       get 'featured', to: 'properties#featured'
+      get 'trips', to: 'properties#trips'
 
       resources :talks do
         member do
