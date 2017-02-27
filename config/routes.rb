@@ -10,6 +10,14 @@ Rails.application.routes.draw do
       get 'autocomplete', to: 'properties#autocomplete'
       get 'featured', to: 'properties#featured'
       get 'trips', to: 'properties#trips'
+      get 'my_properties', to: 'properties#my_properties'
+
+      resources :properties do
+        member do
+          post 'wishlist', to: 'properties#add_to_wishlist'
+          delete 'wishlist', to: 'properties#remove_from_wishlist'
+        end
+      end
 
       resources :talks do
         member do
@@ -18,13 +26,6 @@ Rails.application.routes.draw do
       end
       get 'talks', to: 'talks#index'
       post 'talks/(:id)/messages', to: 'talks#create_message'
-
-      resources :properties do
-        member do
-          post 'wishlist', to: 'properties#add_to_wishlist'
-          delete 'wishlist', to: 'properties#remove_from_wishlist'
-        end
-      end
 
       resources :reservations do
         member do

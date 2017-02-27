@@ -39,6 +39,16 @@ class Api::V1::PropertiesController < ApplicationController
     render json: errors, status: :unprocessable_entity
   end
 
+  # GET /api/v1/my_properties
+  # GET /api/v1/my_properties.json
+  def my_properties
+    @api_v1_properties = current_api_v1_user.properties
+                                            .includes(:reservations)
+                                            .order('reservations.created_at DESC')
+
+    render template: '/api/v1/properties/index', status: 200
+  end
+
   # GET /api/v1/featured
   # GET /api/v1/featured.json
   def featured
