@@ -11,7 +11,6 @@ Rails.application.routes.draw do
       get 'featured', to: 'properties#featured'
       get 'trips', to: 'properties#trips'
       get 'my_properties', to: 'properties#my_properties'
-
       resources :properties do
         member do
           post 'wishlist', to: 'properties#add_to_wishlist'
@@ -19,14 +18,15 @@ Rails.application.routes.draw do
         end
       end
 
+      get 'talks', to: 'talks#index'
+      post 'talks/(:id)/messages', to: 'talks#create_message'
       resources :talks do
         member do
           get 'messages', to: 'talks#messages'
         end
       end
-      get 'talks', to: 'talks#index'
-      post 'talks/(:id)/messages', to: 'talks#create_message'
 
+      get 'get_by_property', to: 'reservations#get_by_property'
       resources :reservations do
         member do
           post 'evaluation', to: 'reservations#evaluation'

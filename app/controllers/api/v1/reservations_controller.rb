@@ -19,6 +19,15 @@ class Api::V1::ReservationsController < ApplicationController
     render json: errors, status: :unprocessable_entity
   end
 
+  # GET /get_by_property
+  # GET /get_by_property.json
+  def get_by_property
+    @api_v1_reservation = current_api_v1_user.properties.find(params[:id]).reservations
+    render template: '/api/v1/reservations/index', status: 200
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
+
   private
 
   def set_api_v1_reservation
