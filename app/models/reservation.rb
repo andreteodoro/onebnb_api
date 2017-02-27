@@ -6,10 +6,15 @@ class Reservation < ApplicationRecord
 
   has_many :talks
 
+  before_create :set_pending_status
   validates_presence_of :property, :user
 
   def staying_days
     (self.checkout_date - self.checkin_date).to_i
+  end
+
+  def set_pending_status
+    self.status ||= :pending
   end
 
   def evaluate comment, new_rating
