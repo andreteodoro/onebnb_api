@@ -1,3 +1,5 @@
+json.extract! @talk, :id
+
 json.talk do
   json.user do
     # Show the information about the other user at the talk
