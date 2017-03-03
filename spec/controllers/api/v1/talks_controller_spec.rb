@@ -49,10 +49,10 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
         get :index
 
-        expect(JSON.parse(response.body)[0]['talk']['id']).to eql(@talk4.id)
-        expect(JSON.parse(response.body)[1]['talk']['id']).to eql(@talk1.id)
-        expect(JSON.parse(response.body)[2]['talk']['id']).to eql(@talk2.id)
-        expect(JSON.parse(response.body)[3]['talk']['id']).to eql(@talk3.id)
+        expect(JSON.parse(response.body)[0]['id']).to eql(@talk4.id)
+        expect(JSON.parse(response.body)[1]['id']).to eql(@talk1.id)
+        expect(JSON.parse(response.body)[2]['id']).to eql(@talk2.id)
+        expect(JSON.parse(response.body)[3]['id']).to eql(@talk3.id)
       end
     end
 
@@ -81,10 +81,10 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
         get :index
 
-        expect(JSON.parse(response.body)[0]['talk']['id']).to eql(@talk4.id)
-        expect(JSON.parse(response.body)[1]['talk']['id']).to eql(@talk1.id)
-        expect(JSON.parse(response.body)[2]['talk']['id']).to eql(@talk2.id)
-        expect(JSON.parse(response.body)[3]['talk']['id']).to eql(@talk3.id)
+        expect(JSON.parse(response.body)[0]['id']).to eql(@talk4.id)
+        expect(JSON.parse(response.body)[1]['id']).to eql(@talk1.id)
+        expect(JSON.parse(response.body)[2]['id']).to eql(@talk2.id)
+        expect(JSON.parse(response.body)[3]['id']).to eql(@talk3.id)
       end
     end
   end
@@ -167,50 +167,54 @@ RSpec.describe Api::V1::TalksController, type: :controller do
   end
 
   describe "POST #create_message" do
-  before do
-    @user = create(:user)
-    @auth_headers = @user.create_new_auth_token
-    request.env["HTTP_ACCEPT"] = 'application/json'
-  end
-
-  context "with valid params and existing talk" do
-
     before do
-      request.headers.merge!(@auth_headers)
-      @talk = create(:talk, user: @user)
+      @user = create(:user)
+      @auth_headers = @user.create_new_auth_token
+      request.env["HTTP_ACCEPT"] = 'application/json'
     end
 
-    it "The talk have a message associated" do
-      post :create_message, params: {id: @talk.id, body: FFaker::Lorem.word}
-      @talk.reload
-      expect(@talk.messages.count).to eql(1)
+    context "with valid params and existing talk" do
+      before do
+        request.headers.merge!(@auth_headers)
+        @talk = create(:talk, user: @user)
+      end
+
+      it "the talk have a message associated" do
+        post :create_message, params: {id: @talk.id, body: FFaker::Lorem.word}
+        @talk.reload
+        expect(@talk.messages.count).to eql(1)
+      end
+
+      it "the last message from conversation have the right body" do
+        body = FFaker::Lorem.word
+        post :create_message, params: {id: @talk.id, body: body}
+        @talk.reload
+        expect(@talk.messages.last.body).to eql(body)
+      end
+
+      it "has the right user associated" do
+        post :create_message, params: {id: @talk.id, body: FFaker::Lorem.word}
+        @talk.reload
+        expect(@talk.user).to eql(@user)
+      end
     end
 
-    it "the last message from conversation have the right body" do
-      body = FFaker::Lorem.word
-      post :create_message, params: {id: @talk.id, body: body}
-      @talk.reload
-      expect(@talk.messages.last.body).to eql(body)
+    context "with valid params and without talk" do
+      before do
+        request.headers.merge!(@auth_headers)
+        @property = create(:property)
+      end
+
+      it "a talk are created" do
+        post :create_message, params: {property_id: @property.id, body: FFaker::Lorem.word}
+        expect(Talk.all.count).to eql(1)
+      end
+
+      it "the last message from conversation have the right body" do
+        body = FFaker::Lorem.word
+        post :create_message, params: {property_id: @property.id, body: body}
+        expect(Talk.last.messages.last.body).to eql(body)
+      end
     end
   end
-
-  context "with valid params and without talk" do
-
-    before do
-      request.headers.merge!(@auth_headers)
-      @property = create(:property)
-    end
-
-    it "A talk are created" do
-      post :create_message, params: {property_id: @property.id, body: FFaker::Lorem.word}
-      expect(Talk.all.count).to eql(1)
-    end
-
-    it "the last message from conversation have the right body" do
-      body = FFaker::Lorem.word
-      post :create_message, params: {property_id: @property.id, body: body}
-      expect(Talk.last.messages.last.body).to eql(body)
-    end
-  end
-end
 end
