@@ -28,4 +28,12 @@ RSpec.describe Reservation, type: :model do
       expect(@property.get_rating).to eq(2)
     end
   end
+
+  describe Reservation, '.staying_days' do
+    it 'Returns valid staying days' do
+      reservation = create(:reservation, checkin_date: Time.now - 5.day, checkout_date: Time.now + 5.day)
+      reservation.staying_days
+      expect(reservation.staying_days).to eq(10)
+    end
+  end
 end
