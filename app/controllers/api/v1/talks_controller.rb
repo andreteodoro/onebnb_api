@@ -8,12 +8,31 @@ class Api::V1::TalksController < ApplicationController
     @talks = Talk.includes(:messages)
                  .joins(:property)
                  .where(['properties.user_id = ? or talks.user_id = ?', current_api_v1_user.id, current_api_v1_user.id])
+                 .where(active: true)
                  .group('talks.id, messages.created_at, messages.id')
                  .order('messages.created_at DESC')
                  .paginate(page: page, per_page: 8)
   end
 
   def messages; end
+
+  def archive
+    if params[:id]
+      set_api_v1_talk
+      @talk.update_attribute(:active, false)
+    else
+      raise 'Without the correct parameters'
+    end
+  end
+
+  def unarchive
+    if params[:id]
+      set_api_v1_talk
+      @talk.update_attribute(:active, true)
+    else
+      raise 'Without the correct parameters'
+    end
+  end
 
   def create_message
     if params[:id]

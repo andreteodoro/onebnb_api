@@ -56,6 +56,21 @@ RSpec.describe Api::V1::TalksController, type: :controller do
       end
     end
 
+    context 'with active and inactive talks' do
+      before do
+        request.headers.merge!(@auth_headers)
+        @talk1 = create(:talk, user: @user, active: false)
+        @talk2 = create(:talk, user: @user)
+      end
+
+      it 'it gets only the activated (unarchived) talks' do
+        get :index
+
+        expect(JSON.parse(response.body).count).to eql(1)
+      end
+
+    end
+
     context 'with valid params and 4 where the user is client in 2 and property in 2' do
       before do
         request.headers.merge!(@auth_headers)
@@ -214,6 +229,34 @@ RSpec.describe Api::V1::TalksController, type: :controller do
         body = FFaker::Lorem.word
         post :create_message, params: {property_id: @property.id, body: body}
         expect(Talk.last.messages.last.body).to eql(body)
+      end
+    end
+  end
+
+  describe "POST #archive" do
+    before do
+      @user = create(:user)
+      @auth_headers = @user.create_new_auth_token
+      request.env["HTTP_ACCEPT"] = 'application/json'
+    end
+
+    context "with valid talks" do
+      before do
+        request.headers.merge!(@auth_headers)
+        @talk = create(:talk, user: @user)
+      end
+
+      it "the talk is archived" do
+        post :archive, params: {id: @talk.id}
+        @talk.reload
+        expect(@talk.active).to eql(false)
+      end
+
+      it "the talk is unarchived" do
+        @talk2 = create(:talk, user: @user, active: false)
+        post :unarchive, params: {id: @talk2.id}
+        @talk2.reload
+        expect(@talk2.active).to eql(true)
       end
     end
   end

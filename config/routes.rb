@@ -19,6 +19,8 @@ Rails.application.routes.draw do
       end
 
       get 'talks', to: 'talks#index'
+      post 'talks/(:id)/archive', to: 'talks#archive'
+      post 'talks/(:id)/unarchive', to: 'talks#unarchive'
       post 'talks/(:id)/messages', to: 'talks#create_message'
       resources :talks do
         member do
