@@ -76,7 +76,22 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
         expect(@reservation.user).to eql(@user)
       end
 
-      # (Criar o teste) return a json with correspondents fields
+      it 'create a reservation with valid fields and correct JSON is returned' do
+        new_reservation_params = { reservation: { property_id: @property1.id, checkin_date: Date.today - 10.day, checkout_date: Date.today + 10.day } }
+
+        post :create, params: new_reservation_params
+
+        @reservation = Reservation.last
+
+        expect(JSON.parse(response.body)['id']).to eql(@reservation.id)
+        expect(JSON.parse(response.body)['status']).to eql(@reservation.status)
+        expect(JSON.parse(response.body)['checkin_date']).to eql(@reservation.checkin_date.strftime('%Y-%m-%d'))
+        expect(JSON.parse(response.body)['checkout_date']).to eql(@reservation.checkout_date.strftime('%Y-%m-%d'))
+        expect(JSON.parse(response.body)['evaluation']).to eql(@reservation.evaluation)
+        expect(JSON.parse(response.body)['status']).to eql(@reservation.status)
+        expect(JSON.parse(response.body)['user']['id']).to eql(@reservation.user.id)
+
+      end
     end
   end
 
@@ -103,5 +118,5 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
       end
     end
   end
-  
+
 end
