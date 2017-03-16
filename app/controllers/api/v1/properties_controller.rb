@@ -1,5 +1,5 @@
 class Api::V1::PropertiesController < ApplicationController
-  before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist]
+  before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist, :check_availability]
   before_action :authenticate_api_v1_user!, except: [:index, :show, :search, :autocomplete, :featured]
 
   # GET /api/v1/search
@@ -114,6 +114,18 @@ class Api::V1::PropertiesController < ApplicationController
   def remove_from_wishlist
     @api_v1_property.wishlists.find_by(user: current_api_v1_user).delete
     render json: { success: true }, status: 200
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
+
+  # GET /check_availability
+  # GET /check_availability
+  def check_availability
+    if @api_v1_property.is_available? params[:checkin_date].to_date, params[:checkout_date].to_date
+      render json: { success: true }, status: 200
+    else
+      render json: { success: false }, status: 200
+    end
   rescue Exception => errors
     render json: errors, status: :unprocessable_entity
   end

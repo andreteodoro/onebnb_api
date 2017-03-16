@@ -37,6 +37,18 @@ class Property < ApplicationRecord
     }
   end
 
+  def is_available?(checkin_date, checkout_date)
+    reservations.where(status: [:pending, :active]).each do |reservation|
+      if reservation.checkin_date.between?(checkin_date, checkout_date) ||
+         reservation.checkout_date.between?(checkin_date, checkout_date) ||
+         checkin_date.between?(reservation.checkin_date, reservation.checkout_date) ||
+         checkout_date.between?(reservation.checkin_date, reservation.checkout_date)
+        return false
+      end
+    end
+    true
+  end
+
   def get_rating
     rating.round
   end
