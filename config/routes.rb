@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       resources :reservations do
         member do
           post 'evaluation', to: 'reservations#evaluation'
+          post 'cancel', to: 'reservations#cancel'
         end
       end
     end
