@@ -91,6 +91,12 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
         expect(JSON.parse(response.body)['status']).to eql(@reservation.status)
         expect(JSON.parse(response.body)['user']['id']).to eql(@reservation.user.id)
       end
+
+      it 'will send a notification mail to Property Owner' do
+        post :create, params: { reservation: { property_id: @property1.id, checkin_date: Date.today - 10.day, checkout_date: Date.today + 10.day } }
+        expect(ActionMailer::Base.deliveries.count).to eq(1)
+        expect(ActionMailer::Base.deliveries.last.to).to eq([Reservation.last.property.user.email])
+      end
     end
   end
 
