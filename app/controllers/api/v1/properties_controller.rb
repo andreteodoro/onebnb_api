@@ -31,9 +31,13 @@ class Api::V1::PropertiesController < ApplicationController
   # GET /api/v1/trips.json
   def trips
     @properties = {}
-    @properties[:next] = current_api_v1_user.reservations.where(status: :active).map(&:property)
-    @properties[:previous] = current_api_v1_user.reservations.where(status: :finished).map(&:property)
-    @properties[:pending] = current_api_v1_user.reservations.where(status: :pending).map(&:property)
+    # Next
+    @properties[:next] = current_api_v1_user.reservations.where(status: :active).map { |r| { property: r.property, reservation: r } }
+    # Previous
+    @properties[:previous] = current_api_v1_user.reservations.where(status: :finished).map { |r| { property: r.property, reservation: r } }
+    # Pending
+    @properties[:pending] = current_api_v1_user.reservations.where(status: :pending).map { |r| { property: r.property, reservation: r } }
+    # Wishlist
     @properties[:wishlist] = current_api_v1_user.wishlists.map(&:property)
   rescue Exception => errors
     render json: errors, status: :unprocessable_entity
