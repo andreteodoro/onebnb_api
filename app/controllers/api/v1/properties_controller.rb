@@ -75,6 +75,7 @@ class Api::V1::PropertiesController < ApplicationController
 
   # GET /api/v1/properties.json
   def index
+    @current_api_v1_user = current_api_v1_user
     @api_v1_properties = Property.all
   end
 
@@ -86,7 +87,7 @@ class Api::V1::PropertiesController < ApplicationController
     @api_v1_property = Property.new(api_v1_property_params)
 
     if @api_v1_property.save
-      render :show, status: :created, location: @api_v1_property
+      render :show, status: :created
     else
       render json: @api_v1_property.errors, status: :unprocessable_entity
     end
@@ -95,7 +96,7 @@ class Api::V1::PropertiesController < ApplicationController
   # PATCH/PUT /api/v1/properties/1.json
   def update
     if @api_v1_property.update(api_v1_property_params)
-      render :show, status: :ok, location: @api_v1_property
+      render :show, status: :ok
     else
       render json: @api_v1_property.errors, status: :unprocessable_entity
     end
@@ -143,6 +144,6 @@ class Api::V1::PropertiesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def api_v1_property_params
-    params.require(:api_v1_property).permit(:name, :description)
-  end
+    params.require(:api_v1_property).permit(:name, :description, :guest_max, :beds, :bedroom, :bathroom, :price, :accommodation_type, address_attributes: [:country, :state, :city, :neighborhood, :street, :number, :zipcode], facility_attributes: [:wifi, :towels, :clothes_iron, :refrigerator, :heater, :air_conditioning, :washing_machine]).merge(status: :pending, user: current_api_v1_user)
+    end
 end

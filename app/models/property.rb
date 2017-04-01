@@ -6,6 +6,9 @@ class Property < ApplicationRecord
   belongs_to :address
   belongs_to :facility
 
+  accepts_nested_attributes_for :address
+  accepts_nested_attributes_for :facility
+
   has_many :wishlists
   has_many :photos
   has_many :comments
