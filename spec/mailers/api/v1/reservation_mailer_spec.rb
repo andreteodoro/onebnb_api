@@ -46,4 +46,27 @@ RSpec.describe Api::V1::ReservationMailer, type: :mailer do
       expect(@mail.body.encoded).to match(@reservation.property.name)
     end
   end
+
+  describe 'accept_reservation' do
+    before do
+      @reservation = create(:reservation)
+      @mail = Api::V1::ReservationMailer.accepted_reservation(@reservation).deliver_now
+    end
+
+    it 'Reservation User is the target' do
+      expect(@mail.to).to eq([@reservation.user.email])
+    end
+
+    it 'renders the subject' do
+      expect(@mail.subject).to eq('Seu pedido de reserva foi aceito \o/')
+    end
+
+    it 'renders the sender email' do
+      expect(@mail.from).to eq(['noreply@onebnb.com'])
+    end
+
+    it 'assigns property name' do
+      expect(@mail.body.encoded).to match(@reservation.property.name)
+    end
+  end
 end

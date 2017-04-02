@@ -1,6 +1,12 @@
 class Api::V1::PropertiesController < ApplicationController
   before_action :set_api_v1_property, only: [:show, :update, :destroy, :add_to_wishlist, :remove_from_wishlist, :check_availability]
   before_action :authenticate_api_v1_user!, except: [:index, :show, :search, :autocomplete, :featured, :check_availability]
+  before_action :set_api_v1_reservation, only: [:evaluation, :cancel, :accept, :refuse]
+  before_action :authenticate_api_v1_user!
+  before_action :is_property_owner?, only: [:accept, :refuse]
+  before_action :is_owner?, only: [:evaluation, :cancel]
+
+
 
   # GET /api/v1/search
   def search
@@ -135,7 +141,33 @@ class Api::V1::PropertiesController < ApplicationController
     render json: errors, status: :unprocessable_entity
   end
 
+  # POST /api/v1/accept.json
+  def accept
+    if @api_v1_reservation.update(status: :active)
+      Api::V1::ReservationMailer.accepted_reservation(@api_v1_reservation).deliver_now
+      render :show, status: :ok
+    else
+      render json: @api_v1_reservation.errors, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def set_api_v1_reservation
+    @api_v1_reservation = Reservation.find(params[:id])
+  end
+
+  def is_property_owner?
+    unless @api_v1_reservation.property.user == current_api_v1_user
+      render json: {}, status: :forbidden
+    end
+  end
+
+  def is_owner?
+    unless @api_v1_reservation.user == current_api_v1_user
+      render json: {}, status: :forbidden
+    end
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_api_v1_property

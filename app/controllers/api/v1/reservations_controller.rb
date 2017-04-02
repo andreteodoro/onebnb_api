@@ -1,6 +1,8 @@
 class Api::V1::ReservationsController < ApplicationController
-  before_action :set_api_v1_reservation, only: [:evaluation, :cancel]
+  before_action :set_api_v1_reservation, only: [:evaluation, :cancel, :accept, :refuse]
   before_action :authenticate_api_v1_user!
+  before_action :is_property_owner?, only: [:accept, :refuse]
+  before_action :is_owner?, only: [:evaluation, :cancel]
 
   # POST /api/v1/reservation.json
   def create
@@ -40,10 +42,32 @@ class Api::V1::ReservationsController < ApplicationController
     render json: errors, status: :unprocessable_entity
   end
 
+  # POST /api/v1/accept.json
+  def accept
+    if @api_v1_reservation.update(status: :active)
+      Api::V1::ReservationMailer.accepted_reservation(@api_v1_reservation).deliver_now
+      render :show, status: :ok
+    else
+      render json: @api_v1_reservation.errors, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_api_v1_reservation
-    @api_v1_reservation = Reservation.where(id: params[:id], user: current_api_v1_user).last
+    @api_v1_reservation = Reservation.find(params[:id])
+  end
+
+  def is_property_owner?
+    unless @api_v1_reservation.property.user == current_api_v1_user
+      render json: {}, status: :forbidden
+    end
+  end
+
+  def is_owner?
+    unless @api_v1_reservation.user == current_api_v1_user
+      render json: {}, status: :forbidden
+    end
   end
 
   def evaluation_params

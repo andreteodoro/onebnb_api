@@ -34,6 +34,7 @@ Rails.application.routes.draw do
         member do
           post 'evaluation', to: 'reservations#evaluation'
           post 'cancel', to: 'reservations#cancel'
+          put 'accept', to: 'reservations#accept'
         end
       end
     end

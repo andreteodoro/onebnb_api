@@ -10,4 +10,9 @@ class Api::V1::ReservationMailer < ApplicationMailer
     @reservation = reservation
     mail(to: @reservation.property.user.email, subject: 'Um pedido de reserva foi cancelado :(')
   end
+
+  def accepted_reservation(reservation)
+    @reservation = reservation
+    mail(to: @reservation.user.email, subject: 'Seu pedido de reserva foi aceito \o/')
+  end
 end
