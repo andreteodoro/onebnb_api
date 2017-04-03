@@ -52,6 +52,16 @@ class Api::V1::ReservationsController < ApplicationController
     end
   end
 
+  # PUT /refuse
+  # PUT /refuse.json
+  def refuse
+    @api_v1_reservation.update(status: :refused)
+    Api::V1::ReservationMailer.refused_reservation(@api_v1_reservation).deliver_now
+    render json: { success: true }, status: 200
+  rescue Exception => errors
+    render json: errors, status: :unprocessable_entity
+  end
+
   private
 
   def set_api_v1_reservation

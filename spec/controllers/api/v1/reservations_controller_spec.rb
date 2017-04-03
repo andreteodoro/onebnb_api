@@ -269,4 +269,56 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
       end
     end
   end
+
+  describe 'PUT #refuse' do
+    before do
+      @user = create(:user)
+      @auth_headers = @user.create_new_auth_token
+      request.env['HTTP_ACCEPT'] = 'application/json'
+      ActionMailer::Base.deliveries = []
+    end
+
+    context 'User is property owner' do
+      before do
+        request.headers.merge!(@auth_headers)
+        @property = create(:property, user: @user)
+        @reservation = create(:reservation, status: :pending, property: @property)
+      end
+
+      it 'Change status of pending to refused' do
+        put :refuse, params: { id: @reservation.id }
+        @reservation.reload
+        expect(@reservation.status).to eql('refused')
+      end
+
+      it 'Receive status 200' do
+        put :refuse, params: { id: @reservation.id }
+        expect(response.status).to eql(200)
+      end
+
+      it 'will send a notification mail to Reservation User' do
+        put :refuse, params: { id: @reservation.id }
+        expect(ActionMailer::Base.deliveries.count).to eq(1)
+        expect(ActionMailer::Base.deliveries.last.to).to eq([Reservation.last.user.email])
+      end
+    end
+
+    context 'User is not the owner of the Property' do
+      before do
+        request.headers.merge!(@auth_headers)
+        @reservation = create(:reservation, status: :pending)
+      end
+
+      it 'Status keep pending' do
+        post :refuse, params: { id: @reservation.id }
+        @reservation.reload
+        expect(@reservation.status).to eql('pending')
+      end
+
+      it 'Receive status 422' do
+        post :refuse, params: { id: @reservation.id }
+        expect(response.status).to eql(403)
+      end
+    end
+  end
 end

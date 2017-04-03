@@ -35,6 +35,7 @@ Rails.application.routes.draw do
           post 'evaluation', to: 'reservations#evaluation'
           post 'cancel', to: 'reservations#cancel'
           put 'accept', to: 'reservations#accept'
+          put 'refuse', to: 'reservations#refuse'
         end
       end
     end
