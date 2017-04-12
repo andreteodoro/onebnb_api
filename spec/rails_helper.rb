@@ -6,9 +6,15 @@ require 'rspec/rails'
 # Adding FFaker
 require 'ffaker'
 
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+
 ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|
+  # Custom json helpers
+  config.include Requests::JsonHelpers, type: :request
+  # Custom Header helpers
+  config.include Requests::HeaderHelpers, type: :request
   # Allowing Jbuilder
   config.render_views = true
   # Including Factory Girl Rails

@@ -1,17 +1,17 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::ReservationsController, type: :controller do
+  include Requests::JsonHelpers
+  include Requests::HeaderHelpers
+
   describe 'GET #evaluation' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with 4 existing reservations and rating 5' do
       before do
-        request.headers.merge!(@auth_headers)
-
         @property1 = create(:property, status: :active, rating: 5)
         @reservation1 = create(:reservation, property: @property1, evaluation: true, user: @user)
         @reservation2 = create(:reservation, property: @property1, evaluation: true, user: @user)
@@ -48,13 +48,11 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
   describe 'POST #create' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with valid params' do
       before do
-        request.headers.merge!(@auth_headers)
         @property1 = create(:property, status: :active, rating: 5)
       end
 
@@ -103,13 +101,11 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
   describe 'GET #get_by_property' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with valid params and 4 reservations' do
       before do
-        request.headers.merge!(@auth_headers)
         @property1 = create(:property, status: :active, rating: 5, user: @user)
         @reservation1 = create(:reservation, property: @property1, evaluation: true)
         @reservation2 = create(:reservation, property: @property1, evaluation: true)
@@ -119,7 +115,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'receive 4 reservations' do
         get :get_by_property, params: { id: @property1.id }
-        expect(JSON.parse(response.body).count).to eql(4)
+        expect(json.count).to eql(4)
       end
     end
   end
@@ -127,13 +123,11 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
   describe 'POST #cancel' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'User is owner of the Reservation' do
       before do
-        request.headers.merge!(@auth_headers)
         @reservation = create(:reservation, user: @user, status: :pending)
       end
 
@@ -150,13 +144,12 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 200' do
         post :cancel, params: { id: @reservation.id }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
     end
 
     context 'User is not the owner of the Reservation' do
       before do
-        request.headers.merge!(@auth_headers)
         @reservation = create(:reservation, status: :pending)
       end
 
@@ -168,7 +161,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 403' do
         post :cancel, params: { id: @reservation.id }
-        expect(response.status).to eql(403)
+        expect_status(403)
       end
     end
   end
@@ -176,14 +169,12 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
   describe 'POST #accept' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
       ActionMailer::Base.deliveries = []
     end
 
     context 'User is property owner' do
       before do
-        request.headers.merge!(@auth_headers)
         @property = create(:property, user: @user)
         @reservation = create(:reservation, status: :pending, property: @property)
       end
@@ -196,7 +187,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 200' do
         put :accept, params: { id: @reservation.id }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
 
       it 'will send a notification mail to Reservation User' do
@@ -208,7 +199,6 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
     context 'User is not the owner of the Property' do
       before do
-        request.headers.merge!(@auth_headers)
         @reservation = create(:reservation, status: :pending)
       end
 
@@ -220,7 +210,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 403' do
         put :accept, params: { id: @reservation.id }
-        expect(response.status).to eql(403)
+        expect_status(403)
       end
     end
   end
@@ -229,13 +219,12 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
     before do
       @user = create(:user)
       @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
       ActionMailer::Base.deliveries = []
     end
 
     context 'User is property owner' do
       before do
-        request.headers.merge!(@auth_headers)
         @property = create(:property, user: @user)
         @reservation = create(:reservation, status: :pending, property: @property)
       end
@@ -248,7 +237,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 200' do
         put :refuse, params: { id: @reservation.id }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
 
       it 'will send a notification mail to Reservation User' do
@@ -272,7 +261,7 @@ RSpec.describe Api::V1::ReservationsController, type: :controller do
 
       it 'Receive status 403' do
         post :refuse, params: { id: @reservation.id }
-        expect(response.status).to eql(403)
+        expect_status(403)
       end
     end
   end

@@ -1,17 +1,17 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::UsersController, type: :controller do
+  include Requests::JsonHelpers
+  include Requests::HeaderHelpers
+
   describe 'GET #current_user' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
     end
 
     context 'with valid params and tokens' do
       before do
-        # Aqui nós estamos colocando no header os tokens (Sem isso a chamada seria bloqueada)
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
       end
 
       it 'get the current user' do
@@ -22,11 +22,12 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
     context 'with invalid params and tokens' do
       before do
+        request.headers.merge!(header_without_authentication)
       end
 
       it 'get a status 401' do
         get :current_user
-        expect(response.status).to eql(401)
+        expect_status(401)
       end
     end
   end
@@ -34,7 +35,6 @@ RSpec.describe Api::V1::UsersController, type: :controller do
   describe 'PUT #update' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
       @new_attributes = {
         name:        FFaker::Name.name,
         description: FFaker::Lorem.paragraph,
@@ -42,14 +42,11 @@ RSpec.describe Api::V1::UsersController, type: :controller do
         birthday:    DateTime.new(2001, 2, 3),
         email:       FFaker::Internet.email
       }
-      # Setting the request as json (the URL users.json will be use instead of users)
-      request.env['HTTP_ACCEPT'] = 'application/json'
     end
 
     context 'with valid params and tokens' do
       before do
-        # Merge the token into the Header
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
       end
 
       it 'updates the requested user' do
@@ -107,10 +104,14 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     end
 
     context 'with invalid tokens' do
+      before do
+        request.headers.merge!(header_without_authentication)
+      end
+
       it 'updates the requested user' do
         @name = FFaker::Name.name
         put :update, params: { id: @user.id, user: @new_attributes }
-        expect(response.status).to eql(401)
+        expect_status(401)
       end
     end
   end
@@ -118,34 +119,32 @@ RSpec.describe Api::V1::UsersController, type: :controller do
   describe 'GET #wishist' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
       @new_attributes = { name: FFaker::Name.name }
     end
 
     context 'with valid params and tokens' do
       before do
-        # Aqui nós estamos colocando no header os tokens (Sem isso a chamada seria bloqueada)
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
         @wishlist = create(:wishlist, user: @user)
         @wishlist2 = create(:wishlist, user: @user)
       end
 
       it 'get a list with two properties' do
         get :wishlist
-        expect(JSON.parse(response.body).count).to eql(2)
+        expect(json.count).to eql(2)
       end
     end
 
     context 'with invalid params and tokens' do
       before do
+        request.headers.merge!(header_without_authentication)
         @wishlist = create(:wishlist, user: @user)
         @wishlist2 = create(:wishlist, user: @user)
       end
 
       it 'get a status 401' do
         get :wishlist
-        expect(response.status).to eql(401)
+        expect_status(401)
       end
     end
   end

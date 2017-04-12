@@ -1,16 +1,17 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::TalksController, type: :controller do
+  include Requests::JsonHelpers
+  include Requests::HeaderHelpers
+
   describe 'GET #index' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with valid params and 10 talks' do
       before do
-        request.headers.merge!(@auth_headers)
         10.times do
           create(:talk, user: @user)
         end
@@ -18,18 +19,17 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
       it 'will receive 8 elements in first page' do
         get :index, page: 1
-        expect(JSON.parse(response.body).count).to eql(8)
+        expect(json.count).to eql(8)
       end
 
       it 'will receive 2 elements in second page' do
         get :index, page: 2
-        expect(JSON.parse(response.body).count).to eql(2)
+        expect(json.count).to eql(2)
       end
     end
 
     context 'with valid params and 4 talks where the user is client' do
       before do
-        request.headers.merge!(@auth_headers)
         @talk1 = create(:talk, user: @user)
         @talk2 = create(:talk, user: @user)
         @talk3 = create(:talk, user: @user)
@@ -38,7 +38,7 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
       it 'receive 4 talks' do
         get :index
-        expect(JSON.parse(response.body).count).to eql(4)
+        expect(json.count).to eql(4)
       end
 
       it 'the results come in the right order (based in last message date)' do
@@ -58,22 +58,19 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
     context 'with active and inactive talks' do
       before do
-        request.headers.merge!(@auth_headers)
         @talk1 = create(:talk, user: @user, active: false)
         @talk2 = create(:talk, user: @user)
       end
 
       it 'it gets only the activated (unarchived) talks' do
         get :index
-
-        expect(JSON.parse(response.body).count).to eql(1)
+        expect(json.count).to eql(1)
       end
 
     end
 
     context 'with valid params and 4 where the user is client in 2 and property in 2' do
       before do
-        request.headers.merge!(@auth_headers)
         @talk1 = create(:talk, user: @user)
         @talk2 = create(:talk, user: @user)
 
@@ -85,7 +82,7 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
       it 'receive 4 talks' do
         get :index
-        expect(JSON.parse(response.body).count).to eql(4)
+        expect(json.count).to eql(4)
       end
 
       it 'the results come in the right order (based in last message date)' do
@@ -107,27 +104,25 @@ RSpec.describe Api::V1::TalksController, type: :controller do
   describe 'GET #messages' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with invalid user' do
       before do
-        request.headers.merge!(@auth_headers)
         @user2 = create(:user)
         @talk = create(:talk, user: @user2)
+        request.headers.merge!(header_without_authentication)
         create(:message, talk: @talk)
       end
 
       it 'will receive status 401' do
         get :messages, id: @talk.id
-        expect(response.status).to eql(401)
+        expect_status(401)
       end
     end
 
     context 'with valid params and 10 messages' do
       before do
-        request.headers.merge!(@auth_headers)
         @talk = create(:talk, user: @user)
         10.times do
           create(:message, talk: @talk)
@@ -153,7 +148,6 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
     context 'with valid params and a reservation associated' do
       before do
-        request.headers.merge!(@auth_headers)
         @reservation = create(:reservation)
         @talk = create(:talk, user: @user, reservation: @reservation)
         @message = create(:message, talk: @talk)
@@ -168,7 +162,6 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
     context 'with valid params and zero reservation associated' do
       before do
-        request.headers.merge!(@auth_headers)
         @talk = create(:talk, user: @user, reservation: nil)
         @message = create(:message, talk: @talk)
       end
@@ -184,13 +177,11 @@ RSpec.describe Api::V1::TalksController, type: :controller do
   describe "POST #create_message" do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env["HTTP_ACCEPT"] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context "with valid params and existing talk" do
       before do
-        request.headers.merge!(@auth_headers)
         @talk = create(:talk, user: @user)
       end
 
@@ -216,7 +207,7 @@ RSpec.describe Api::V1::TalksController, type: :controller do
 
     context "with valid params and without talk" do
       before do
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
         @property = create(:property)
       end
 
@@ -236,13 +227,11 @@ RSpec.describe Api::V1::TalksController, type: :controller do
   describe "POST #archive" do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env["HTTP_ACCEPT"] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context "with valid talks" do
       before do
-        request.headers.merge!(@auth_headers)
         @talk = create(:talk, user: @user)
       end
 

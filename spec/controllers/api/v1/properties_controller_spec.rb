@@ -1,18 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::PropertiesController, type: :controller do
+  include Requests::JsonHelpers
+  include Requests::HeaderHelpers
+
   before do
     @user = create(:user)
-    @auth_headers = @user.create_new_auth_token
-    # Setting the request as json (the URL properties.json will be use instead of users)
-    request.env['HTTP_ACCEPT'] = 'application/json'
+    request.headers.merge!(header_with_authentication @user)
   end
 
   describe 'GET #index' do
     context 'whith valid params' do
       it 'gets the properties' do
         get :index
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
     end
   end
@@ -25,18 +26,13 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
     context 'whith valid params' do
       it 'show the property' do
         get :show, params: { id: @property.id }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
     end
   end
 
   describe 'POST #create' do
     context 'whith valid params' do
-      before do
-        # Merge the token into the Header
-        request.headers.merge!(@auth_headers)
-      end
-
       it 'creates the requested property' do
         # TODO: fix commented tests
         @new_attributes = {
@@ -94,14 +90,11 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
     before do
       @user = create(:user)
       @property = create(:property)
-
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
     end
 
     context 'with valid params and tokens' do
       before do
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
       end
 
       it 'add to wishlist' do
@@ -122,28 +115,18 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         expect(Wishlist.last.property.id).to eql(@property.id)
       end
     end
-
-    context 'with invalid tokens' do
-      it "can't add to wishlist" do
-        post :add_to_wishlist, params: { id: @property.id }
-        expect(response.status).to eql(401)
-      end
-    end
   end
 
   describe 'DELETE #wishlist' do
     before do
-      @user     = create(:user)
+      @user = create(:user)
       @property = create(:property)
       @wishlist = create(:wishlist, user: @user, property: @property)
-
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
     end
 
     context 'with valid params and tokens' do
       before do
-        request.headers.merge!(@auth_headers)
+        request.headers.merge!(header_with_authentication @user)
       end
 
       it 'remove from wishlist' do
@@ -153,9 +136,13 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
     end
 
     context 'with invalid tokens' do
+      before do
+        request.headers.merge!(header_without_authentication)
+      end
+
       it "can't add to wishlist" do
         delete :remove_from_wishlist, params: { id: @property.id }
-        expect(response.status).to eql(401)
+        expect_status(422)
       end
 
       it 'whishlist keep existing' do
@@ -166,10 +153,6 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
   end
 
   describe 'GET #search' do
-    before do
-      request.env['HTTP_ACCEPT'] = 'application/json'
-    end
-
     context 'with a property associated a search query' do
       it 'receive one result when property active' do
         @address = create(:address, city: 'Sao Paulo')
@@ -178,7 +161,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         Property.reindex
 
         get :search, params: { search: 'Sao Paulo' }
-        expect(JSON.parse(response.body).count).to eql(1)
+        expect(json.count).to eql(1)
       end
 
       it 'receive zero result when property not active' do
@@ -188,7 +171,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         Property.reindex
 
         get :search, params: { search: 'Sao Paulo' }
-        expect(JSON.parse(response.body).count).to eql(0)
+        expect(json.count).to eql(0)
       end
 
       it 'receive one result when the property has wi-fi' do
@@ -202,7 +185,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         Property.reindex
 
         get :search, params: { wifi: true, search: 'Sao Paulo' }
-        expect(JSON.parse(response.body).count).to eql(1)
+        expect(json.count).to eql(1)
       end
     end
 
@@ -214,16 +197,12 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         Property.reindex
 
         get :search, params: { search: 'Manaus' }
-        expect(JSON.parse(response.body).count).to eql(0)
+        expect(json.count).to eql(0)
       end
     end
   end
 
   describe 'GET #autocomplete' do
-    before do
-      request.env['HTTP_ACCEPT'] = 'application/json'
-    end
-
     context 'with 2 existing properties and 1 active' do
       before do
         @property1 = create(:property, status: :active)
@@ -232,7 +211,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
       it 'return 3 elements of result' do
         get :autocomplete
-        expect(JSON.parse(response.body).count).to eql(3)
+        expect(json.count).to eql(3)
       end
 
       it 'return name of Property, city and country of property in 3 first elements' do
@@ -251,7 +230,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
       it 'return 0 elements of result' do
         get :autocomplete
-        expect(JSON.parse(response.body).count).to eql(0)
+        expect(json.count).to eql(0)
       end
     end
   end
@@ -272,7 +251,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
       it 'return 3 elements of result' do
         get :featured
-        expect(JSON.parse(response.body).count).to eql(3)
+        expect(json.count).to eql(3)
       end
 
       it 'return the 3 properties thar are priority' do
@@ -304,8 +283,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
   describe 'GET #trips' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with 2 reservations active, 2 reservations pending, 2 reservations finished and 2 properties in wishlist' do
@@ -330,7 +308,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
         @wishlist1 = Wishlist.create(user: @user, property: @property7)
         @wishlist2 = Wishlist.create(user: @user, property: @property8)
-        request.headers.merge!(@auth_headers)
+
       end
 
       it "return 2 properties in 'next' trips and right properties" do
@@ -366,8 +344,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
   describe 'GET #my_properties' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'with 4 properties of the current_user' do
@@ -381,13 +358,11 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         @reservation2 = create(:reservation, property: @property2, status: :pending)
         @reservation3 = create(:reservation, property: @property3, status: :pending)
         @reservation4 = create(:reservation, property: @property4, status: :pending)
-
-        request.headers.merge!(@auth_headers)
       end
 
       it 'return 4 properties' do
         get :my_properties
-        expect(JSON.parse(response.body).count).to eql(4)
+        expect(json.count).to eql(4)
       end
 
       it 'return by last reservation order' do
@@ -416,8 +391,6 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
         @reservation1 = create(:reservation, property: @property, checkin_date: @busy_period1[:checkin_date], checkout_date: @busy_period1[:checkout_date])
         @reservation2 = create(:reservation, property: @property, checkin_date: @busy_period2[:checkin_date], checkout_date: @busy_period2[:checkin_date])
-
-        request.headers.merge!(@auth_headers)
       end
 
       it 'return true' do
@@ -427,7 +400,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
       it 'return status 200' do
         get :check_availability, params: { id: @property.id, checkin_date: (Date.today + 3.day).strftime('%d/%m/%Y'), checkout_date: (Date.today + 4.day).strftime('%d/%m/%Y') }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
     end
 
@@ -440,8 +413,6 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
         @reservation1 = create(:reservation, property: @property, checkin_date: @busy_period1[:checkin_date], checkout_date: @busy_period1[:checkout_date])
         @reservation2 = create(:reservation, property: @property, checkin_date: @busy_period2[:checkin_date], checkout_date: @busy_period2[:checkin_date])
-
-        request.headers.merge!(@auth_headers)
       end
 
       it 'return false' do
@@ -454,8 +425,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
   describe 'GET #check_availability' do
     before do
       @user = create(:user)
-      @auth_headers = @user.create_new_auth_token
-      request.env['HTTP_ACCEPT'] = 'application/json'
+      request.headers.merge!(header_with_authentication @user)
     end
 
     context 'A date with avaibility' do
@@ -467,8 +437,6 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
         @reservation1 = create(:reservation, property: @property, checkin_date: @busy_period1[:checkin_date], checkout_date: @busy_period1[:checkout_date])
         @reservation2 = create(:reservation, property: @property, checkin_date: @busy_period2[:checkin_date], checkout_date: @busy_period2[:checkin_date])
-
-        request.headers.merge!(@auth_headers)
       end
 
       it 'return true' do
@@ -478,7 +446,7 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
 
       it 'return status 200' do
         get :check_availability, params: { id: @property.id, checkin_date: (Date.today + 3.day).strftime('%d/%m/%Y'), checkout_date: (Date.today + 4.day).strftime('%d/%m/%Y') }
-        expect(response.status).to eql(200)
+        expect_status(200)
       end
     end
 
@@ -492,7 +460,6 @@ RSpec.describe Api::V1::PropertiesController, type: :controller do
         @reservation1 = create(:reservation, property: @property, checkin_date: @busy_period1[:checkin_date], checkout_date: @busy_period1[:checkout_date])
         @reservation2 = create(:reservation, property: @property, checkin_date: @busy_period2[:checkin_date], checkout_date: @busy_period2[:checkin_date])
 
-        request.headers.merge!(@auth_headers)
       end
 
       it 'return false' do
