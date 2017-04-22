@@ -9,14 +9,18 @@ class Property < ApplicationRecord
   accepts_nested_attributes_for :address
   accepts_nested_attributes_for :facility
 
-  has_many :wishlists
-  has_many :photos
-  has_many :comments
-  has_many :reservations
-  has_many :talks
-  has_many :messages
 
-  validates_presence_of :address, :facility, :user, :status, :price, :photos,
+  has_many :wishlists, dependent: :destroy
+  has_many :photos, dependent: :destroy
+  has_many :reservations, dependent: :destroy
+
+  has_many :talks, dependent: :destroy
+
+  has_many :comments, dependent: :destroy
+
+  has_many :messages, dependent: :destroy
+
+  validates_presence_of :address, :facility, :user, :status, :price,
                         :accommodation_type, :beds, :bedroom, :bathroom, :guest_max,
                         :description
 
@@ -41,10 +45,10 @@ class Property < ApplicationRecord
   end
 
   def is_available?(checkin_date, checkout_date)
-    reservations.where(status: [:pending, :active]).each do |reservation|
-      if reservation.checkin_date.between?(checkin_date, checkout_date) ||
-         reservation.checkout_date.between?(checkin_date, checkout_date) ||
-         checkin_date.between?(reservation.checkin_date, reservation.checkout_date) ||
+    self.reservations.where(status: [:pending, :active]).each do |reservation|
+      if reservation.checkin_date.between?(checkin_date, checkout_date) or
+         reservation.checkout_date.between?(checkin_date, checkout_date) or
+         checkin_date.between?(reservation.checkin_date, reservation.checkout_date) or
          checkout_date.between?(reservation.checkin_date, reservation.checkout_date)
         return false
       end
