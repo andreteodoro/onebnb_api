@@ -17,11 +17,8 @@ WORKDIR $INSTALL_PATH
 # Copy the Gemfile into the container
 COPY Gemfile Gemfile.lock ./
 
-# Install the gems
-RUN bundle install
+# Set the path to the gems
+ENV BUNDLE_PATH /box
 
 # Copy the code into the container
 COPY . .
-
-# Run the server
-CMD puma -C config/puma.rb

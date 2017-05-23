@@ -26,26 +26,22 @@ services:
       - 'redis'
       - 'mailcatcher'
     build: .
+    command: bash start
     ports:
       - '3000:3000'
     volumes:
       - '.:/onebnb_api'
+    volumes_from:
+      - box
     env_file:
       - '.env'
     environment:
       ELASTICSEARCH_URL: elasticsearch:9200
 
-  cable:
-    depends_on:
-      - 'redis'
-    build: .
-    command: puma -p 28080 cable/config.ru
-    ports:
-      - '28080:28080'
+  box:
+    image: busybox
     volumes:
-      - '.:/onebnb_api'
-    env_file:
-      - '.env'
+    - /box
 
   elasticsearch:
     image: 'elasticsearch:2'
@@ -60,3 +56,4 @@ volumes:
   redis:
   postgres:
   elastic:
+  box:

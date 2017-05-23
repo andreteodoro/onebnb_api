@@ -1,0 +1,4 @@
+# Install the Gems
+bundle check || bundle install
+# Run the server
+bundle exec rails s -b 0.0.0.0
