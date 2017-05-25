@@ -17,4 +17,5 @@ class User < ActiveRecord::Base
   has_many :comments, dependent: :destroy
   has_many :reservations, dependent: :destroy
   has_many :properties, dependent: :destroy
+  has_many :transactions
 end

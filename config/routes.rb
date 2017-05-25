@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
+      get 'transactions/index'
+    end
+  end
+
+  namespace :api do
+    namespace :v1 do
       mount_devise_token_auth_for 'User', at: 'auth'
       get 'users/wishlist', to: 'users#wishlist'
       put 'users', to: 'users#update'
@@ -18,6 +24,8 @@ Rails.application.routes.draw do
           get 'check_availability', to: 'properties#check_availability'
         end
       end
+
+      get 'transactions/index'
 
       get 'talks', to: 'talks#index'
       post 'talks/(:id)/archive', to: 'talks#archive'
