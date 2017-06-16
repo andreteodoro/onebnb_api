@@ -90,8 +90,6 @@ GEM
     hashie (3.4.6)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
-    httparty (0.15.5)
-      multi_xml (>= 0.5.2)
     i18n (0.7.0)
     jbuilder (2.6.1)
       activesupport (>= 3.0.0, < 5.1)
@@ -110,11 +108,7 @@ GEM
     mini_magick (4.6.0)
     mini_portile2 (2.1.0)
     minitest (5.10.1)
-    moip2 (0.1.4)
-      httparty
-      recursive-open-struct
     multi_json (1.12.1)
-    multi_xml (0.6.0)
     multipart-post (2.0.0)
     netrc (0.11.0)
     nio4r (1.2.1)
@@ -159,7 +153,6 @@ GEM
     rb-fsevent (0.9.8)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
-    recursive-open-struct (1.0.4)
     redis (3.3.3)
     responders (2.3.0)
       railties (>= 4.2.0, < 5.1)
@@ -234,7 +227,6 @@ DEPENDENCIES
   jbuilder (~> 2.5)
   listen (~> 3.0.5)
   mini_magick
-  moip2
   omniauth
   pg (~> 0.18)
   puma (~> 3.0)
