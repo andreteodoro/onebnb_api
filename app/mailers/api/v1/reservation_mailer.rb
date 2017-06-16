@@ -20,4 +20,9 @@ class Api::V1::ReservationMailer < ApplicationMailer
     @reservation = reservation
     mail(to: @reservation.user.email, subject: 'Seu pedido de reserva foi recusado :(')
   end
+
+  def new_reservation_remember(reservation)
+    @reservation = reservation
+    mail(to: @reservation.property.user.email, subject: 'Você tem um novo pedido de reserva \o/ não se esqueça')
+  end
 end

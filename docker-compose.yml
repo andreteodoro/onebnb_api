@@ -20,6 +20,22 @@ services:
     volumes:
       - 'redis:/var/lib/redis/data'
 
+  jobs:
+    depends_on:
+      - 'postgres'
+      - 'redis'
+      - 'website'
+    build: .
+    command: bash start_jobs
+    volumes:
+      - '.:/onebnb_api'
+    volumes_from:
+      - box
+    env_file:
+      - '.env'
+    environment:
+      ELASTICSEARCH_URL: elasticsearch:9200
+
   website:
     depends_on:
       - 'postgres'

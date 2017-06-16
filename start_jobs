@@ -1,0 +1,4 @@
+# Install the gems
+bundle check || bundle install
+# Run the jobs
+bundle exec sidekiq -q mailers,notification

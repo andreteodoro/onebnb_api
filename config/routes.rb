@@ -1,4 +1,8 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/sidekiq'
+
   namespace :api do
     namespace :v1 do
       get 'transactions/index'
@@ -44,6 +48,7 @@ Rails.application.routes.draw do
           post 'cancel', to: 'reservations#cancel'
           put 'accept', to: 'reservations#accept'
           put 'refuse', to: 'reservations#refuse'
+          get  'payment', to: 'reservations#payment'
         end
       end
     end
